@@ -1,5 +1,3 @@
-
-
 use std::fmt::Display;
 
 use anyhow::anyhow;
@@ -55,10 +53,7 @@ impl Coordinates {
         x %= 1000;
         y %= 1000;
 
-        Ok(Self {
-            x,
-            y
-        })
+        Ok(Self { x, y })
     }
 }
 
@@ -107,24 +102,35 @@ fn coordinates_to_canvas(mut x: i32, mut y: i32) -> anyhow::Result<i32> {
     Err(anyhow!("Invalid coordinates ({}, {})", x, y))
 }
 
-pub async fn make_query(client: &mut Client, x: i32, y: i32, color: Color, bearer: &str) -> anyhow::Result<()> {
-    let r = client.post("https://gql-realtime-2.reddit.com/query")
-    .bearer_auth(bearer)
-    .header("Accept-Encoding", "gzip, deflate, br")
-    .header("Accept-Language", "en-US;en;q=0.5")
-    .header("apollographql-client-name", "garlic-bread")
-    .header("apollographql-client-version", "0.0.1")
-    .header("Origin", "https://garlic-bread.reddit.com")
-    .header("Referer", "https://garlic-bread.reddit.com")
-    .header("Sec-Fetch-Dest", "empty")
-    .header("Sec-Fetch-Mode", "cors")
-    .header("Sec-Fetch-Site", "same-site")
-    .header("TE", "trailers")
-    .header("Connection", "keep-alive")
-    .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0")
-    .json(&PixelQuery::new(x, y, color)?)
-    .send().await?
-    .error_for_status()?;
+pub async fn make_query(
+    client: &Client,
+    x: i32,
+    y: i32,
+    color: Color,
+    bearer: &str,
+) -> anyhow::Result<()> {
+    let r = client
+        .post("https://gql-realtime-2.reddit.com/query")
+        .bearer_auth(bearer)
+        .header("Accept-Encoding", "gzip, deflate, br")
+        .header("Accept-Language", "en-US;en;q=0.5")
+        .header("apollographql-client-name", "garlic-bread")
+        .header("apollographql-client-version", "0.0.1")
+        .header("Origin", "https://garlic-bread.reddit.com")
+        .header("Referer", "https://garlic-bread.reddit.com")
+        .header("Sec-Fetch-Dest", "empty")
+        .header("Sec-Fetch-Mode", "cors")
+        .header("Sec-Fetch-Site", "same-site")
+        .header("TE", "trailers")
+        .header("Connection", "keep-alive")
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0",
+        )
+        .json(&PixelQuery::new(x, y, color)?)
+        .send()
+        .await?
+        .error_for_status()?;
     Ok(())
 }
 
@@ -146,5 +152,5 @@ pub enum Color {
     Black = 27,
     Gray = 29,
     LightGray = 30,
-    White = 31
+    White = 31,
 }
