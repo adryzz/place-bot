@@ -10,21 +10,21 @@ mod pixel;
 const POSITION: (i32, i32) = (300, 180);
 
 const PIXELS: [(i32, i32, Color); 15] = [
-    (0, 0, Color::Black),
-    (0, 1, Color::Black),
-    (0, 3, Color::Black),
-    (0, 5, Color::Black),
-    (1, 0, Color::Black),
-    (1, 3, Color::Black),
-    (1, 5, Color::Black),
-    (2, 0, Color::Black),
-    (2, 1, Color::Black),
-    (2, 3, Color::Black),
-    (2, 5, Color::Black),
-    (3, 0, Color::Black),
-    (3, 3, Color::Black),
-    (3, 4, Color::Black),
-    (3, 5, Color::Black),
+    (0, 0, Color::LightBlue),
+    (0, 1, Color::LightPink),
+    (0, 2, Color::White),
+    (0, 3, Color::LightPink),
+    (1, 4, Color::LightBlue),
+    (1, 0, Color::LightBlue),
+    (1, 1, Color::LightPink),
+    (1, 2, Color::White),
+    (1, 3, Color::LightPink),
+    (1, 4, Color::LightBlue),
+    (2, 0, Color::LightBlue),
+    (2, 1, Color::LightPink),
+    (2, 2, Color::White),
+    (2, 3, Color::LightPink),
+    (2, 4, Color::LightBlue),
 ];
 
 #[tokio::main]

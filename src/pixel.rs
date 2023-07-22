@@ -109,7 +109,7 @@ pub async fn make_query(
     color: Color,
     bearer: &str,
 ) -> anyhow::Result<()> {
-    let r = client
+    let _ = client
         .post("https://gql-realtime-2.reddit.com/query")
         .bearer_auth(bearer)
         .header("Accept-Encoding", "gzip, deflate, br")
@@ -134,6 +134,8 @@ pub async fn make_query(
     Ok(())
 }
 
+
+#[allow(dead_code)]
 #[repr(i32)]
 #[derive(Debug, Clone, Copy, Display)]
 pub enum Color {
