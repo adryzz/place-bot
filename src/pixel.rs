@@ -1,3 +1,7 @@
+
+
+use std::fmt::Display;
+
 use anyhow::anyhow;
 use reqwest::Client;
 use serde::Serialize;
@@ -59,7 +63,7 @@ impl Coordinates {
 }
 
 impl PixelQuery {
-    pub fn new(x: i32, y: i32, color: i32) -> anyhow::Result<Self> {
+    pub fn new(x: i32, y: i32, color: Color) -> anyhow::Result<Self> {
         Ok(Self {
             operation_name: OPERATION_NAME,
             variables: PixelQueryVariables {
@@ -67,7 +71,7 @@ impl PixelQuery {
                     action_name: ACTION_NAME,
                     pixel_message_data: PixelMessageData {
                         coordinate: Coordinates::new(x, y)?,
-                        color_index: color,
+                        color_index: color as i32,
                         canvas_index: coordinates_to_canvas(x, y)?,
                     },
                 },
@@ -103,7 +107,7 @@ fn coordinates_to_canvas(mut x: i32, mut y: i32) -> anyhow::Result<i32> {
     Err(anyhow!("Invalid coordinates ({}, {})", x, y))
 }
 
-pub async fn make_query(client: &mut Client, x: i32, y: i32, color: i32, bearer: &str) -> anyhow::Result<()> {
+pub async fn make_query(client: &mut Client, x: i32, y: i32, color: Color, bearer: &str) -> anyhow::Result<()> {
     let r = client.post("https://gql-realtime-2.reddit.com/query")
     .bearer_auth(bearer)
     .header("Accept-Encoding", "gzip, deflate, br")
@@ -122,4 +126,25 @@ pub async fn make_query(client: &mut Client, x: i32, y: i32, color: i32, bearer:
     .send().await?
     .error_for_status()?;
     Ok(())
+}
+
+#[repr(i32)]
+#[derive(Debug, Clone, Copy, Display)]
+pub enum Color {
+    Red = 2,
+    Orange = 3,
+    Yellow = 4,
+    DarkGreen = 6,
+    LightGreen = 8,
+    DarkBlue = 12,
+    Blue = 13,
+    LightBlue = 14,
+    DarkPurple = 17,
+    Purple = 18,
+    LightPink = 23,
+    Brown = 25,
+    Black = 27,
+    Gray = 29,
+    LightGray = 30,
+    White = 31
 }
