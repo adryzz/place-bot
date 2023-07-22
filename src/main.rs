@@ -49,14 +49,16 @@ async fn main() {
 
     for pix in PIXELS {
         let account = pool.get().await.unwrap();
-        account
-            .place_task(pix.0 + POSITION.0, pix.1 + POSITION.1, pix.2)
-            .await;
+        tokio::spawn(async move {
+            account.place_task(pix.0 + POSITION.0, pix.1 + POSITION.1, pix.2).await;
+        });
+        
     }
 }
 
 type AccountPool = unmanaged::Pool<Account>;
 
+#[derive(Debug, Clone)]
 struct Account {
     token: String,
     client: Client,
