@@ -1,0 +1,14 @@
+[package]
+name = "place-bot-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.72"
+arti = "1.1.6"
+clap = { version = "4.3.17", features = ["derive"] }
+reqwest = { version = "0.11.18", features = ["json", "tokio-rustls"] }
+serde = { version = "1.0.174", features = ["derive"] }
+tokio = { version = "1.29.1", features = ["full"] }
