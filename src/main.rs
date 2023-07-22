@@ -1,44 +1,48 @@
 #[macro_use]
 extern crate enum_display_derive;
+use clap::Parser;
 use deadpool::unmanaged;
 use pixel::Color;
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder, Proxy};
 use std::time::Duration;
 
 mod pixel;
-
-const POSITION: (i32, i32) = (300, 180);
-
-const PIXELS: [(i32, i32, Color); 15] = [
-    (0, 0, Color::LightBlue),
-    (0, 1, Color::LightPink),
-    (0, 2, Color::White),
-    (0, 3, Color::LightPink),
-    (1, 4, Color::LightBlue),
-    (1, 0, Color::LightBlue),
-    (1, 1, Color::LightPink),
-    (1, 2, Color::White),
-    (1, 3, Color::LightPink),
-    (1, 4, Color::LightBlue),
-    (2, 0, Color::LightBlue),
-    (2, 1, Color::LightPink),
-    (2, 2, Color::White),
-    (2, 3, Color::LightPink),
-    (2, 4, Color::LightBlue),
-];
+mod template;
 
 #[tokio::main]
 async fn main() {
-    let config_json = tokio::fs::read("config.json")
+    let args = Args::parse();
+
+    let template = template::image_to_template(&args.template)
+        .await
+        .expect("Invalid template");
+
+    println!("Loaded {} pixels from template", template.len());
+
+    let config_json = tokio::fs::read(args.config)
         .await
         .expect("Couldn't find config file");
     let tokens: Vec<String> = serde_json::from_slice(&config_json).expect("Invalid configuration");
 
     let mut accounts = Vec::with_capacity(tokens.len());
+
+    let client: Client;
+
+    match args.proxy {
+        Some(p) => {
+            client = ClientBuilder::new()
+                .proxy(Proxy::https(p).expect("Invalid proxy"))
+                .build();
+        }
+        None => {
+            client = Client::new();
+        }
+    }
+
     for i in 0..tokens.len() {
         accounts.push(Account {
             token: tokens[i].clone(),
-            client: Client::new(),
+            client: client.clone(),
             id: i,
         })
     }
@@ -47,12 +51,13 @@ async fn main() {
 
     let pool = AccountPool::from(accounts);
 
-    for pix in PIXELS {
+    for pix in template {
         let account = pool.get().await.unwrap();
         tokio::spawn(async move {
-            account.place_task(pix.0 + POSITION.0, pix.1 + POSITION.1, pix.2).await;
+            account
+                .place_task(pix.0 + args.x, pix.1 + args.y, pix.2)
+                .await;
         });
-        
     }
 }
 
@@ -80,4 +85,28 @@ impl Account {
         // Wait for 5 minutes
         tokio::time::sleep(Duration::from_secs(60 * 5)).await
     }
+}
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Config file path
+    #[arg(short, long)]
+    config: String,
+
+    /// Template file path
+    #[arg(short, long)]
+    template: String,
+
+    /// Request proxy to use
+    #[arg(short, long)]
+    proxy: Option<String>,
+
+    /// X offset
+    #[arg(short, default_value_t = 0)]
+    x: i32,
+
+    /// Y offset
+    #[arg(short, default_value_t = 0)]
+    y: i32,
 }

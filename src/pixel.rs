@@ -134,7 +134,6 @@ pub async fn make_query(
     Ok(())
 }
 
-
 #[allow(dead_code)]
 #[repr(i32)]
 #[derive(Debug, Clone, Copy, Display)]
