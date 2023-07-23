@@ -3,6 +3,7 @@ extern crate enum_display_derive;
 use clap::Parser;
 use deadpool::unmanaged;
 use pixel::Color;
+use rand::Rng;
 use reqwest::{Client, ClientBuilder, Proxy};
 use std::time::Duration;
 
@@ -51,11 +52,21 @@ async fn main() {
 
     let pool = AccountPool::from(accounts);
 
+    if args.r#loop {
+        loop {
+            place_template(template.clone(), &pool, args.x, args.y, args.randomize).await;
+        }
+    }
+
+    place_template(template.clone(), &pool, args.x, args.y, args.randomize).await;
+}
+
+async fn place_template(template: Vec<(i32, i32, Color)>, pool: &AccountPool, x: i32, y: i32, random: u32) {
     for pix in template {
         let account = pool.get().await.unwrap();
         tokio::spawn(async move {
             account
-                .place_task(pix.0 + args.x, pix.1 + args.y, pix.2)
+                .place_task(pix.0 + x, pix.1 + y, pix.2, random)
                 .await;
         });
     }
@@ -71,7 +82,7 @@ struct Account {
 }
 
 impl Account {
-    async fn place_task(&self, x: i32, y: i32, color: Color) {
+    async fn place_task(&self, x: i32, y: i32, color: Color, random: u32) {
         match pixel::make_query(&self.client, x, y, color, &self.token).await {
             Err(e) => {
                 eprintln!("[{}] {}", self.id, e)
@@ -83,7 +94,8 @@ impl Account {
 
         println!("[{}] Waiting cooldown...", self.id);
         // Wait for 5 minutes
-        tokio::time::sleep(Duration::from_secs(60 * 5)).await
+        let r = rand::thread_rng().gen_range(0..(random+1));
+        tokio::time::sleep(Duration::from_secs((60 * 5) + r as u64)).await
     }
 }
 
@@ -95,7 +107,7 @@ struct Args {
     config: String,
 
     /// Template file path
-    #[arg(short, long)]
+    #[arg(short, long, default_value_t)]
     template: String,
 
     /// Request proxy to use
@@ -109,4 +121,12 @@ struct Args {
     /// Y offset
     #[arg(short, default_value_t = 0)]
     y: i32,
+
+    /// Randomize the time offset between each request
+    #[arg(short, long, default_value_t = 0)]
+    randomize: u32,
+
+    /// Randomize the time offset between each request
+    #[arg(short, long, default_value_t = false)]
+    r#loop: bool,
 }
