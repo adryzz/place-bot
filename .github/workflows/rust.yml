@@ -24,4 +24,4 @@ jobs:
     # Artifact name
         name: "release-windows"
     # A file, directory or wildcard pattern that describes what to upload
-        path: "target/release/"
+        path: "target/release/place-bot-rs.exe"
