@@ -32,7 +32,7 @@ async fn main() {
         Some(p) => {
             client = ClientBuilder::new()
                 .proxy(Proxy::https(p).expect("Invalid proxy"))
-                .build();
+                .build().unwrap();
         }
         None => {
             client = Client::new();
