@@ -100,7 +100,7 @@ impl Account {
 }
 
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None, allow_hyphen_values = true)]
 struct Args {
     /// Config file path
     #[arg(short, long)]
