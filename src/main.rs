@@ -107,7 +107,7 @@ struct Args {
     config: String,
 
     /// Template file path
-    #[arg(short, long, default_value_t)]
+    #[arg(short, long)]
     template: String,
 
     /// Request proxy to use
@@ -126,7 +126,7 @@ struct Args {
     #[arg(short, long, default_value_t = 0)]
     randomize: u32,
 
-    /// Randomize the time offset between each request
+    /// Keep drawing the same template even after you're finished
     #[arg(short, long, default_value_t = false)]
     r#loop: bool,
 }
